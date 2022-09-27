@@ -24,8 +24,8 @@ export default function Actions() {
     const { theme } = useTheme() as DefaultTheme;
 
     const addToCollect = () => {
-        const { name, pixels, size, id, rows, columns } = controller;
-        add({ id, name, pixels, size, row: rows, column: columns });
+        const { name, pixels, size, id, rows, columns, width, height } = controller;
+        add({ id, name, pixels, size, row: rows, column: columns, width, height });
     };
 
     const reset = async () => {

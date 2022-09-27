@@ -52,8 +52,8 @@ export default function HistoricalReview() {
     const [url, _setURL] = useState<string>();
 
     const setURL = async (pixels: Pixels, index: number) => {
-        const { rows, columns } = controller;
-        _setURL(blobToImgSrc(await toBlob(pixels, rows, columns, controller)));
+        const { rows, columns, width, height } = controller;
+        _setURL(blobToImgSrc(await toBlob(pixels, rows, columns, width, height)));
         setActiveIndex(index);
     };
 
