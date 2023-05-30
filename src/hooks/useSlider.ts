@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 
 export type Boundary = { left: number; top: number; width: number; height: number };
 export interface UseCliderOptions {
@@ -38,11 +38,11 @@ export default function useSlider({ defaultState, ref, onMoving }: UseCliderOpti
         };
         const handleUp = () => (canMove.current = false);
 
-        document.addEventListener('mousemove', handleMove);
-        document.addEventListener('mouseup', handleUp);
+        document.addEventListener("mousemove", handleMove);
+        document.addEventListener("mouseup", handleUp);
         return () => {
-            window.removeEventListener('mousemove', handleMove);
-            window.removeEventListener('mouseup', handleUp);
+            window.removeEventListener("mousemove", handleMove);
+            window.removeEventListener("mouseup", handleUp);
         };
     }, []);
 

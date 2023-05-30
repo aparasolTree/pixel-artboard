@@ -1,6 +1,6 @@
-import { invariant } from './invariant';
-import EventTarget from './EventTarget';
-import { clamp, createCanvasElement, deepClone, isCanvasElement } from './utils';
+import { invariant } from "./invariant";
+import EventTarget from "./EventTarget";
+import { clamp, createCanvasElement, deepClone, isCanvasElement } from "./utils";
 
 export interface PixelArtboardOptions {
     width?: number;
@@ -24,24 +24,24 @@ export type Pixel = {
 };
 export type Pixels = Pixel[][];
 export type EventName =
-    | 'brush:down'
-    | 'brush:move'
-    | 'brush:up'
-    | 'size'
-    | 'forward'
-    | 'save'
-    | 'back'
-    | 'erase:start'
-    | 'erasing'
-    | 'erase:end'
-    | 'reset'
-    | 'change:name'
-    | 'set:rows'
-    | 'set:columns'
-    | 'change:color'
-    | 'width'
-    | 'height'
-    | 'eyedropper';
+    | "brush:down"
+    | "brush:move"
+    | "brush:up"
+    | "size"
+    | "forward"
+    | "save"
+    | "back"
+    | "erase:start"
+    | "erasing"
+    | "erase:end"
+    | "reset"
+    | "change:name"
+    | "set:rows"
+    | "set:columns"
+    | "change:color"
+    | "width"
+    | "height"
+    | "eyedropper";
 
 export type PixelEvent = {
     row: number;
@@ -53,20 +53,20 @@ export type PixelEvent = {
 export class PixelArtboard extends EventTarget<EventName> {
     private _rows: number;
     private _columns: number;
-    private _name: string = '';
+    private _name: string = "";
     private _size: number = 0;
-    private _brushColor: string = '';
+    private _brushColor: string = "";
     private _width: number = 0;
     private _height: number = 0;
 
-    public id: string = '';
+    public id: string = "";
     public rowSpacing: number = 0;
     public columnSpacing: number = 0;
     public isMouseDown: boolean = false;
     public canRender: boolean = true;
     public offscreenCanvas: HTMLCanvasElement | null = null;
     public offscreenCanvasContext: CanvasRenderingContext2D | null = null;
-    public brushState: 'rubber' | 'brush' | 'fill' | 'eyedropper' = 'brush';
+    public brushState: "rubber" | "brush" | "fill" | "eyedropper" = "brush";
 
     public past: Pixels[] = [];
     public pixels: Pixels = [];
@@ -85,10 +85,10 @@ export class PixelArtboard extends EventTarget<EventName> {
     }
 
     mount(element: HTMLCanvasElement) {
-        invariant(isCanvasElement(element), 'the element found is not a canvas element');
+        invariant(isCanvasElement(element), "the element found is not a canvas element");
 
         this.element = element as HTMLCanvasElement;
-        this.context = this.element.getContext('2d')!;
+        this.context = this.element.getContext("2d")!;
 
         this.initCanvasWidthHeight(this.width, this.height);
         this.setRowsColumnsSpacing();
@@ -106,13 +106,13 @@ export class PixelArtboard extends EventTarget<EventName> {
 
     initOffscreenCanvas() {
         this.offscreenCanvas = createCanvasElement(this.width, this.height);
-        this.offscreenCanvasContext = this.offscreenCanvas?.getContext('2d') ?? null;
+        this.offscreenCanvasContext = this.offscreenCanvas?.getContext("2d") ?? null;
     }
 
     createArtboardPixels() {
         this.pixels = Array.from({ length: this.rows }, (_, r) => {
             return Array.from({ length: this.columns }, (_, c) => ({
-                color: '',
+                color: "",
                 opacity: 1,
                 row: r,
                 column: c,
@@ -127,7 +127,7 @@ export class PixelArtboard extends EventTarget<EventName> {
 
     renderBackgroundGrid(ctx: CanvasRenderingContext2D) {
         ctx.save();
-        ctx.strokeStyle = 'rgba(0, 0, 0, .04)';
+        ctx.strokeStyle = "rgba(0, 0, 0, .04)";
         ctx.lineWidth = 2;
         ctx.beginPath();
         for (let i = 1; i < this.rows; i++) {
@@ -172,52 +172,52 @@ export class PixelArtboard extends EventTarget<EventName> {
         const color = this.getFixelColor(row, column);
 
         this.isMouseDown = true;
-        if (this.brushState === 'brush') {
+        if (this.brushState === "brush") {
             if (!this.isColorSame(color, this.brushColor)) {
                 this.future = [];
                 this.save();
                 this.__renderPixel(row, column);
             }
 
-            this.dispatch('brush:down', {
+            this.dispatch("brush:down", {
                 row,
                 currentColor: color,
                 column,
                 fillColor: this.brushColor,
             });
-        } else if (this.brushState === 'rubber') {
+        } else if (this.brushState === "rubber") {
             if (color) {
                 this.save();
                 this._clearPixel(row, column);
             }
 
-            this.dispatch('erase:start', {
+            this.dispatch("erase:start", {
                 row,
                 column,
                 currentColor: color,
                 fillColor: this.brushColor,
             });
-        } else if (this.brushState === 'fill') {
+        } else if (this.brushState === "fill") {
             this.save();
             const canFillList = this._getSiblingPixel(this.pixels[row][column]);
             canFillList.forEach((pixel) => (pixel.color = this.brushColor));
             this.render();
-        } else if (this.brushState === 'eyedropper') {
+        } else if (this.brushState === "eyedropper") {
             this.brushColor = color;
-            this.dispatch('eyedropper');
+            this.dispatch("eyedropper");
         }
     }
 
     private _getSiblingPixel = (pixel: Pixel, wrapper: Pixel[] = []) => {
         if (wrapper.includes(pixel)) return [];
-        if (!pixel.color) wrapper.push(pixel);
+        wrapper.push(pixel);
         const { row, column } = pixel;
         pixelSiblingMap.forEach(([r, c]) => {
             r = clamp(r + row, 0, this.pixels.length - 1);
             c = clamp(c + column, 0, this.pixels[r].length - 1);
             const siblingPixel = this.pixels[r][c];
 
-            if (!pixel.color) {
+            if (siblingPixel.color === pixel.color) {
                 this._getSiblingPixel(siblingPixel, wrapper);
             }
         });
@@ -229,24 +229,24 @@ export class PixelArtboard extends EventTarget<EventName> {
         if (this.isMouseDown) {
             const { row, column } = this.getPixelCoord(event);
             const color = this.getFixelColor(row, column);
-            if (this.brushState === 'brush') {
+            if (this.brushState === "brush") {
                 if (!this.isColorSame(color, this.brushColor)) {
                     this.__renderPixel(row, column);
                 }
 
-                this.dispatch('brush:move', {
+                this.dispatch("brush:move", {
                     row,
                     currentColor: color,
                     column,
                     fillColor: this.brushColor,
                 });
-            } else if (this.brushState === 'rubber') {
+            } else if (this.brushState === "rubber") {
                 color && this._clearPixel(row, column);
-                this.dispatch('erasing', {
+                this.dispatch("erasing", {
                     row,
                     currentColor: color,
                     column,
-                    fillColor: '',
+                    fillColor: "",
                 });
             }
         }
@@ -255,11 +255,11 @@ export class PixelArtboard extends EventTarget<EventName> {
     private _handleMouseUp(event: MouseEvent) {
         if (this.isMouseDown) {
             this.isMouseDown = false;
-            if (this.brushState === 'rubber') this.dispatch('erase:end');
-            else if (this.brushState === 'brush') {
+            if (this.brushState === "rubber") this.dispatch("erase:end");
+            else if (this.brushState === "brush") {
                 const { row, column } = this.getPixelCoord(event);
                 const color = this.getFixelColor(row, column);
-                this.dispatch('brush:up', {
+                this.dispatch("brush:up", {
                     row,
                     currentColor: color,
                     column,
@@ -270,7 +270,7 @@ export class PixelArtboard extends EventTarget<EventName> {
     }
 
     private async _clearPixel(row: number, column: number) {
-        this.pixels[row][column].color = '';
+        this.pixels[row][column].color = "";
         this.render();
         this.size = await this.getCanvasSize();
     }
@@ -282,17 +282,17 @@ export class PixelArtboard extends EventTarget<EventName> {
         const mouseup = this._handleMouseUp.bind(this);
         const contextmenu = (event: MouseEvent) => event.preventDefault();
 
-        this.element.addEventListener('mousedown', mousedown);
-        this.element.addEventListener('mousemove', mousemove);
-        window.addEventListener('mouseup', mouseup);
-        this.element.addEventListener('contextmenu', contextmenu);
+        this.element.addEventListener("mousedown", mousedown);
+        this.element.addEventListener("mousemove", mousemove);
+        window.addEventListener("mouseup", mouseup);
+        this.element.addEventListener("contextmenu", contextmenu);
 
         return () => {
             if (!this.element) return;
-            this.element.removeEventListener('mousedown', mousedown);
-            this.element.removeEventListener('mousemove', mousemove);
-            window.removeEventListener('mouseup', mouseup);
-            this.element.removeEventListener('contextmenu', contextmenu);
+            this.element.removeEventListener("mousedown", mousedown);
+            this.element.removeEventListener("mousemove", mousemove);
+            window.removeEventListener("mouseup", mouseup);
+            this.element.removeEventListener("contextmenu", contextmenu);
         };
     }
 
@@ -351,7 +351,7 @@ export class PixelArtboard extends EventTarget<EventName> {
         const clonePixels = deepClone(this.pixels) as Pixels;
         if (this.past.length >= 20) this.past.shift();
         this.past.push(clonePixels);
-        this.dispatch('save');
+        this.dispatch("save");
     }
 
     back() {
@@ -361,7 +361,7 @@ export class PixelArtboard extends EventTarget<EventName> {
             this.pixels = past;
             this.future.push(current);
             this.render();
-            this.dispatch('back');
+            this.dispatch("back");
         }
     }
 
@@ -372,7 +372,7 @@ export class PixelArtboard extends EventTarget<EventName> {
             this.pixels = future;
             this.past.push(current);
             this.render();
-            this.dispatch('forward');
+            this.dispatch("forward");
         }
     }
 
@@ -400,7 +400,7 @@ export class PixelArtboard extends EventTarget<EventName> {
             this.renderPixels(this.offscreenCanvasContext);
 
             this.offscreenCanvas?.toBlob((blob) => {
-                if (!blob) return reject(new Error('blob is not defined'));
+                if (!blob) return reject(new Error("blob is not defined"));
                 resolve(blob);
             }, type);
         });
@@ -412,7 +412,7 @@ export class PixelArtboard extends EventTarget<EventName> {
         this.pixels = [];
         this.past = [];
         this.createArtboardPixels();
-        this.dispatch('reset');
+        this.dispatch("reset");
     }
 
     async resetArtboard() {
@@ -427,9 +427,9 @@ export class PixelArtboard extends EventTarget<EventName> {
 
     async download(type?: string) {
         const blob = await this.toBlob(type);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.setAttribute('download', this.name);
+        a.setAttribute("download", this.name);
         a.click();
     }
 
@@ -447,9 +447,9 @@ export class PixelArtboard extends EventTarget<EventName> {
         this.setRowsColumnsSpacing();
         const blob = await this.toBlob(type);
         this.pixels = currentPixels;
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.setAttribute('download', name);
+        a.setAttribute("download", name);
         a.click();
     }
 
@@ -480,7 +480,7 @@ export class PixelArtboard extends EventTarget<EventName> {
             this.pixels = this.pixels.concat(
                 Array.from({ length: value - this.rows }, (_, r) => {
                     return Array.from({ length: this.columns }, (_, c) => ({
-                        color: '',
+                        color: "",
                         opacity: 1,
                         row: len + r,
                         column: c,
@@ -493,7 +493,7 @@ export class PixelArtboard extends EventTarget<EventName> {
         this._rows = value;
         this.render();
         this.setRowsColumnsSpacing();
-        this.dispatch('set:rows');
+        this.dispatch("set:rows");
     }
 
     set columns(value: number) {
@@ -502,7 +502,7 @@ export class PixelArtboard extends EventTarget<EventName> {
                 const len = row.length;
                 return row.concat(
                     Array.from({ length: value - this.columns }, (_, c) => ({
-                        color: '',
+                        color: "",
                         opacity: 1,
                         row: this.pixels.length,
                         column: len + c,
@@ -517,7 +517,7 @@ export class PixelArtboard extends EventTarget<EventName> {
         this._columns = value;
         this.render();
         this.setRowsColumnsSpacing();
-        this.dispatch('set:columns');
+        this.dispatch("set:columns");
     }
 
     get rows() {
@@ -535,7 +535,7 @@ export class PixelArtboard extends EventTarget<EventName> {
     set name(newValue: string) {
         if (this._name !== newValue) {
             this._name = newValue;
-            this.dispatch('change:name');
+            this.dispatch("change:name");
         }
     }
 
@@ -546,7 +546,7 @@ export class PixelArtboard extends EventTarget<EventName> {
     set size(newValue: number) {
         if (newValue !== this._size) {
             this._size = newValue;
-            this.dispatch('size');
+            this.dispatch("size");
         }
     }
 
@@ -557,7 +557,7 @@ export class PixelArtboard extends EventTarget<EventName> {
     set brushColor(newValue: string) {
         if (newValue !== this._brushColor) {
             this._brushColor = newValue;
-            this.dispatch('change:color');
+            this.dispatch("change:color");
         }
     }
 
@@ -569,10 +569,10 @@ export class PixelArtboard extends EventTarget<EventName> {
         if (newWidth !== this._width && this.element) {
             this._width = newWidth;
             this.element.width = newWidth;
-            this.element.style.width = newWidth + 'px';
+            this.element.style.width = newWidth + "px";
             this.setRowsColumnsSpacing();
             this.render();
-            this.dispatch('width');
+            this.dispatch("width");
         }
     }
 
@@ -584,10 +584,10 @@ export class PixelArtboard extends EventTarget<EventName> {
         if (newHeight !== this._height && this.element) {
             this._height = newHeight;
             this.element.height = newHeight;
-            this.element.style.height = newHeight + 'px';
+            this.element.style.height = newHeight + "px";
             this.setRowsColumnsSpacing();
             this.render();
-            this.dispatch('height');
+            this.dispatch("height");
         }
     }
 }

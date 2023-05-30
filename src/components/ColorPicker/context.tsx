@@ -1,5 +1,5 @@
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { hex2hsv, hsl2Rgb, hsv2hsl, rgb2hex } from '../../utils';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { hex2hsv, hsl2Rgb, hsv2hsl, rgb2hex } from "../../utils";
 
 export type HSV = { h: number; s: number; v: number };
 export type RGB = { r: number; g: number; b: number };
@@ -18,7 +18,7 @@ const defaultState = {
     hsv: { h: 0, s: 1, v: 1 },
     rgb: { r: 255, g: 255, b: 255 },
     hsl: { h: 0, s: 0, l: 100 },
-    hex: '#ffffff',
+    hex: "#ffffff",
     setHSV: console.log,
     setHex: console.log,
     clear: console.log,
@@ -62,12 +62,12 @@ export default function ColorPickerProvider({
         onChange && onChange(hex);
     }, [hex, onChange]);
 
-    useEffect(() => {
-        const hsv = hex2hsv(defaultColor);
-        if (hsv) {
-            _setHSV(hsv);
-        }
-    }, [defaultColor]);
+    // useEffect(() => {
+    //     const hsv = hex2hsv(defaultColor);
+    //     if (hsv) {
+    //         _setHSV(hsv);
+    //     }
+    // }, [defaultColor]);
 
     return (
         <ColorPickerContext.Provider value={{ hsv, rgb, hex, hsl, setHSV, setHex, clear }}>
