@@ -1,10 +1,13 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
-import { CollectProvider } from '../context/CollectContext';
+import { CollectProvider } from "../context/CollectContext";
 
-import PixelArtboard from './PixelArtboard';
-import Sidebar from './Sidebar';
-import Background from './Background';
+import PixelArtboard from "./PixelArtboard";
+import Sidebar from "./Sidebar";
+import Background from "./Background";
+import useKeyDown from "../hooks/useKeyDown";
+import React from "react";
+import { usePixelArtboard } from "../pixel";
 
 const Container = styled.div`
     flex: 1;
@@ -24,6 +27,15 @@ const Main = styled.div`
 `;
 
 export default function WebBody() {
+    const { controller } = usePixelArtboard();
+    useKeyDown(
+        "Ctrl+z",
+        React.useCallback(() => controller.back(), [])
+    );
+    useKeyDown(
+        "Ctrl+y",
+        React.useCallback(() => controller.forward(), [])
+    );
     return (
         <Container>
             <Background />
